@@ -1,26 +1,47 @@
-class TicTacToe      # Manages the high level game functions
+require_relative 'player.rb'
+require_relative 'board.rb'
+
+
+
+
+
+class TicTacToe 
 	def initialize 
-		@board = Board.new
-		
-		@player_x = Player.new("Madame X", :x, @board)
-		@player_y = Player.new("Mister Y", :y, @board)
-		
-		@current_player = @player_x
+		@board = Board.new		#IV 
+		@player_x = Player.new("Madame X", :x, @board)	#IV 
+		@player_y = Player.new("Mister Y", :y, @board)	#IV
+		@current_player = @player_x	#IV
 	end
 
-	def play 
+
+
+
+	def play 			       #IM
 		loop do 
 			@board.render       
 		  @current_player.get_coordinates      
-			
 			break if check_game_over        
 			switch_players    
 		end 
 	end
 
+
+
+
+
+
+
+
+
+
+
+
+	private
+
 	def check_game_over
 		check_victory || check_draw
 	end 
+
 
 	def check_victory
 		if @board.winning_combination?(@current_player.piece)
@@ -31,6 +52,7 @@ class TicTacToe      # Manages the high level game functions
 		end
 	end
 
+
 	def check_draw
 		if @board.full?
 			puts "Bummer, you've drawn.."
@@ -39,6 +61,7 @@ class TicTacToe      # Manages the high level game functions
 			false 
 		end 
 	end 
+
 
 	def switch_players
 		if @current_player == @player_x
@@ -50,136 +73,6 @@ class TicTacToe      # Manages the high level game functions
 end
 
 
-class Player     # Handles interactions with the human player 
-	attr_accessor :name, :piece
-
-	def initialize(name = "Mystery_Player", piece, board)
-		raise "Piece must be a Symbol!" unless piece.is_a?(Symbol)
-		@name = name 
-		@piece = piece 
-		@board = board
-	end
-
-	def get_coordinates 
-		loop do 
-			coords = ask_for_coordinates
-			if validate_coordinates_format(coords)
-				if @board.add_piece(coords, @piece)
-					break
-				end
-			end
-		end
-	end 
-
-	def ask_for_coordinates 
-		puts "#{@name}(#{@piece}), enter your coordinates in the form x, y: "
-		# invoke .map on array [x, y] + calls to_i on each item 
-		gets.strip.split(",").map(&:to_i)				
-	end 
-
-	def validate_coordinates_format(coords)
-		if coords.is_a?(Array) && coords.size == 2
-			true 
-		else
-			puts "Your coordinates are in the improper format!"
-		end
-	end
-end
-
-
-class Board      
-	def initialize 
-		@board = Array.new(3){Array.new(3)}
-	end
-
-	def render
-		puts 
-		@board.each do |row|
-			row.each do |cell|
-				cell.nil? ? print("-") : print(cell.to_s)
-			end
-			puts
-		end
-		puts
-	end 
-
-	def add_piece(coords, piece)
-		if piece_location_valid?(coords)
-			# place piece
-			@board[coords[0]][coords[1]] = piece
-			true
-		else
-			false 
-		end 
-	end 
-
-	def piece_location_valid?(coords)
-		if within_valid_coordinates?(coords)
-			coordinates_available?(coords)
-		end 
-	end 
-
-	def within_valid_coordinates?(coords)
-		# UNLESS piece coords are in the acceptible range
-		if (0..2).include?(coords[0]) && (0..2).include?(coords[1])
-			true 
-		else 
-			puts "Piece coordinates are out of bounds"
-		end 
-	end
-	
-	def coordinates_available?(coords)
-		if @board[coords[0]][coords[1]].nil?
-			true 
-		else 
-			puts "There is already a piece there!" 
-		end
-	end 
-
-	def winning_combination?(piece)
-		winning_diagonal?(piece) || winning_vertial?(piece) || winning_horizontal?(piece)
-	end 
-	
-	def winning_diagonal?(piece)
-		diagonals.any? do |diags| 
-			diags.all?{|cell| cell == piece}
-		end
-	end 
-
-	def winning_vertial?(piece)
-  	verticals.any? do |verts|
-  		verts.all?{|cell| cell == piece}
-  	end
-  end 
-
-	def winning_horizontal?(piece)
-		horizontals.any? do |horz|
-			horz.all?{|cell| cell == piece}
-		end
-	end 
-
-	def diagonals
-		[[@board[0][0],@board[1][1],@board[2][2]], [@board[2][0],@board[1][1],@board[0][2]]]
-	end 
-
-	def verticals
-		@board
-	end 
-
-	def horizontals	
-		horizontals = []
-		3.times do |i|
-			horizontals << [@board[0][i], @board[1][i], @board[2][i]]
-		end 
-		horizontals
-	end 
-
-	def full?
-		@board.all? do |row|
-			row.none?(&:nil?)
-		end
-	end 
-end
 
 t = TicTacToe.new
 t.play 
